@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Article;
+use App\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,7 +17,7 @@ class ArticleController extends Controller
     public function index()
     {
         return view('admin.articles.index',[
-            'articles' => Articles::orderBy('created_at', 'desc')->paginate(10)
+            'articles' => Article::orderBy('created_at', 'desc')->paginate(10)
         ]);
     }
 
@@ -27,7 +28,11 @@ class ArticleController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.articles.create', [
+           'article' => [],
+           'categories' => Category::with('children')->where('parent_id', 0)->get(),
+           'delimiter' => 0,
+        ]);
     }
 
     /**
@@ -38,7 +43,13 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $article = Article::create($request->all());
+
+        if ($request->input('categories')){
+            $article->categories()->attach($request->input('categories'));
+        }
+
+        return redirect()->route('admin.article.index');
     }
 
     /**
