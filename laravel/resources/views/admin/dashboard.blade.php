@@ -49,6 +49,22 @@
                 @endforeach
             </div>
         </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <a class="btn btn-block btn-default" href="{{route('admin.event.create')}}">Создать событие</a>
+                @foreach($events as $event)
+                    <a class="list-group-item" href="{{route('admin.event.edit', $event)}}">
+                        <h4 class="list-group-item-heading">{{$event->title}}</h4>
+                        <p class="list-group-item-text">
+                            Информация о событиях на будущее
+                        </p>
+                    </a>
+                @endforeach
+            </div>
+            <div class="col-sm-6">
+                <p>Здесь пока ничего</p>
+            </div>
+        </div>
     </div>
 
 @endsection
