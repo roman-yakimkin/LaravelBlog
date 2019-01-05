@@ -18,14 +18,15 @@ window.Vue = require('vue');
  */
 
 $(document).ready(function(){
-   CKEDITOR.replace('description_short');
-   CKEDITOR.replace('description');
+//   CKEDITOR.replace('description_short');
+//   CKEDITOR.replace('description');
 });
 
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
+Vue.component('event-dates', require('./components/EventDates.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

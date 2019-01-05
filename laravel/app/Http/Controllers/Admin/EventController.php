@@ -29,6 +29,7 @@ class EventController extends Controller
     {
         return view('admin.events.create', [
             'event' => [],
+            'event_dates' => ['01.01.2500'],
             'delimiter' => 0
         ]);
     }
@@ -41,11 +42,13 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        $event = Event::create($request->all());
+//        $event = Event::create($request->all());
+//
+//        if ($request->input('dates')){
+//            $event->dates()->attach($request->input('dates'));
+//        }
 
-        if ($request->input('dates')){
-            $event->dates()->attach($request->input('dates'));
-        }
+        dd($request->all());
 
         return redirect()->route('admin.event.index');
     }

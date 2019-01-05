@@ -9,7 +9,7 @@ class Event extends Model
     protected $filable = ['title'];
 
     public function dates(){
-
+        return $this->hasMany(EventDates::class, 'event_id');
     }
 
     public function dates_str(){
