@@ -1,7 +1,11 @@
 <template>
     <div class="container">
         <div class="row">
-            <select name="dates_select" class="form-control custom-select" v-model="dates_option">
+            <select name="dates_select"
+                    class="form-control custom-select"
+                    v-model="dates_option"
+                    @change="changeDatesSelect"
+            >
                 <option value="1">Выбрать даты</option>
                 <option value="2">По заявке</option>
                 <option value="3">По мере комплектования группы</option>
@@ -14,7 +18,7 @@
                             name="date_calendar"
                             :inline="true"
                             :language="ru"
-                            @selected="elSelected"
+                            @selected="calendarSelected"
                 >
                 </datepicker>
             </div>
@@ -23,21 +27,20 @@
                 <button type="button" class="btn btn-secondary btn-block" v-on:click="removeDate">Remove date</button>
             </div>
             <div class="col-sm-4">
-                <select name="dates_list" class="form-control" size="8">
-                    <option></option>
+                <select name="dates_list"
+                        class="form-control"
+                        size="8"
+                        v-model="dates_list_current"
+                        @dblclick="removeDate"
+                >
+                    <option v-for="one_date in dates_list" :value="one_date">{{one_date}}</option>
                 </select>
             </div>
-        </div>
-        <div class="row">
-            <span>{{dates_result}}</span>
         </div>
     </div>
 </template>
 
 <script>
-    // import FunctionalCalendar from 'vue-functional-calendar';
-    // import DatePick from 'vue-date-pick';
-    // import 'vue-date-pick/dist/vueDatePick.css';
     import Datepicker from 'vuejs-datepicker';
     import moment from 'moment';
     import {en, ru} from 'vuejs-datepicker/dist/locale'
@@ -52,87 +55,72 @@
         ],
         data: function(){
           return {
-              dates_result: this.dates,
+              dates_list: [],
+              dates_list_current: "",
+              dates_result: [],
               dates_option: 1,
               calendarDate: new Date(),
               calendarFormat: 'yyyy-MM-dd',
-              calendarConfigs: {
-                  sundayStart: false,
-                  dateFormat: 'dd.mm.yyyy',
-                  placeholder: true,
-                  isDatePicker: true,
-                  isDateRange: false,
-                  monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
-                  dayNames: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-                  ondblclick: function(){
-                      console.log('!!!!!!');
-                  },
-              },
               en: en,
               ru: ru,
               calendarTime: {
                   prev: 0,
                   now: 0,
-              }
+              },
           }
         },
+        watch: {
+            dates_list: function(val) {
+                this.dates_result = [...val];
+            }
+        },
         mounted() {
-            console.log("EventDates mounted");
-            // console.log([...this.dates]);
-            // console.log([...byDemand]);
-            // console.log(JSON.stringify(this.dates));
-            // console.log(JSON.stringify(byDemand));
-
             if (JSON.stringify(this.dates) === JSON.stringify(byDemand)){
                 this.dates_option = 2;
+                this.dates_result = [...byDemand];
             }
             else if (JSON.stringify(this.dates) === JSON.stringify(byComplect)){
                 this.dates_option = 3;
+                this.dates_result = [...byComplect];
             }
             else {
                 this.dates_option = 1;
                 this.dates_list = [...this.dates];
             }
-
-
-//            this.dates_result = [...this.dates_result, '01.01.2500'];
-//            this.dates_option = 2;
-//            console.log(this.dates_option);
+            console.log('mounted dates_option: ' + this.dates_option)
         },
         methods: {
-            setDatesList: function(){
-                return 'test'
-            },
             changeDatesSelect: function(target) {
-                console.log('dates_option: ' + this.dates_option)
-                switch (dates_option){
-                    case 1:
+                switch (this.dates_option){
+                    case '1':
                         this.dates_result = [...this.dates_list];
                         break;
-                    case 2:
+                    case '2':
                         this.dates_result = [...byDemand];
                         break;
-                    case 3:
+                    case '3':
                         this.dates_result = [...byComplect];
                         break;
                 }
             },
             addDate(){
                 let formattedDate = moment(this.calendarDate).format('DD.MM.YYYY');
-                console.log(formattedDate);
-                console.log('Date Added !!!');
+                let index = this.dates_list.indexOf(formattedDate);
+                if (index < 0){
+                    this.dates_list.push(formattedDate);
+                }
             },
             removeDate(){
-                console.log('Date removed !!!');
+                if (this.dates_list.length > 0){
+                    this.dates_list.splice(this.dates_list.indexOf(this.dates_list_current), 1);
+                }
             },
-            elSelected(){
-                let formattedDate = moment(this.calendarDate).format('DD.MM.YYYY');
+            calendarSelected(){
                 this.calendarTime.prev = this.calendarTime.now;
                 this.calendarTime.now = new Date().getTime();
                 let interval = this.calendarTime.now-this.calendarTime.prev;
                 if (interval < 500){
-                    console.log(interval);
-                    console.log(formattedDate);
+                    this.addDate();
                 }
             }
         }

@@ -22,8 +22,8 @@
             <tbody>
             @forelse($events as $event)
                 <tr>
-                    <td>{{$cle->title}}</td>
-                    <td>{{$article->dates_str()}}</td>
+                    <td>{{$event->title}}</td>
+                    <td>{{$event->dates_str()}}</td>
                     <td class="text-right">
                         <form onsubmit="if(confirm('Удалить?')){return true} else {return false}"
                               action="{{route('admin.event.destroy', $event)}}"

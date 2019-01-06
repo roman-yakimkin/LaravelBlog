@@ -16,7 +16,7 @@ class EventController extends Controller
     public function index()
     {
         return view('admin.events.index', [
-            'events' => Event::paginate(2)
+            'events' => Event::paginate(10)
         ]);
     }
 
@@ -42,14 +42,18 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-//        $event = Event::create($request->all());
-//
-//        if ($request->input('dates')){
-//            $event->dates()->attach($request->input('dates'));
-//        }
+        $event = Event::create($request->all());
 
-        dd($request->all());
-
+        if ($request->input('dates_result')){
+            $dates = explode(",", $request->input('dates_result'));
+            $datetimes = [];
+            foreach($dates as $one_date){
+                $newtime = \DateTime::createFromFormat('d.m.Y', $one_date);
+                //dd($newtime->format('Y-m-d'));
+                $datetimes[] = new \App\EventDates(['event_date' => $newtime->format('Y-m-d')]);
+            }
+            $event->dates()->saveMany($datetimes);
+        }
         return redirect()->route('admin.event.index');
     }
 

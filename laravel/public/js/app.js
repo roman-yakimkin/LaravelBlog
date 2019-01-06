@@ -1811,9 +1811,12 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
-// import FunctionalCalendar from 'vue-functional-calendar';
-// import DatePick from 'vue-date-pick';
-// import 'vue-date-pick/dist/vueDatePick.css';
+//
+//
+//
+//
+//
+//
 
 
 
@@ -1826,22 +1829,12 @@ var byComplect = ['01.01.2600'];
   props: ['dates'],
   data: function data() {
     return {
-      dates_result: this.dates,
+      dates_list: [],
+      dates_list_current: "",
+      dates_result: [],
       dates_option: 1,
       calendarDate: new Date(),
       calendarFormat: 'yyyy-MM-dd',
-      calendarConfigs: {
-        sundayStart: false,
-        dateFormat: 'dd.mm.yyyy',
-        placeholder: true,
-        isDatePicker: true,
-        isDateRange: false,
-        monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
-        dayNames: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-        ondblclick: function ondblclick() {
-          console.log('!!!!!!');
-        }
-      },
       en: vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__["en"],
       ru: vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__["ru"],
       calendarTime: {
@@ -1850,62 +1843,61 @@ var byComplect = ['01.01.2600'];
       }
     };
   },
+  watch: {
+    dates_list: function dates_list(val) {
+      this.dates_result = _toConsumableArray(val);
+    }
+  },
   mounted: function mounted() {
-    console.log("EventDates mounted"); // console.log([...this.dates]);
-    // console.log([...byDemand]);
-    // console.log(JSON.stringify(this.dates));
-    // console.log(JSON.stringify(byDemand));
-
     if (JSON.stringify(this.dates) === JSON.stringify(byDemand)) {
       this.dates_option = 2;
+      this.dates_result = [].concat(byDemand);
     } else if (JSON.stringify(this.dates) === JSON.stringify(byComplect)) {
       this.dates_option = 3;
+      this.dates_result = [].concat(byComplect);
     } else {
       this.dates_option = 1;
       this.dates_list = _toConsumableArray(this.dates);
-    } //            this.dates_result = [...this.dates_result, '01.01.2500'];
-    //            this.dates_option = 2;
-    //            console.log(this.dates_option);
+    }
 
+    console.log('mounted dates_option: ' + this.dates_option);
   },
   methods: {
-    setDatesList: function setDatesList() {
-      return 'test';
-    },
     changeDatesSelect: function changeDatesSelect(target) {
-      console.log('dates_option: ' + this.dates_option);
-
-      switch (dates_option) {
-        case 1:
+      switch (this.dates_option) {
+        case '1':
           this.dates_result = _toConsumableArray(this.dates_list);
           break;
 
-        case 2:
+        case '2':
           this.dates_result = [].concat(byDemand);
           break;
 
-        case 3:
+        case '3':
           this.dates_result = [].concat(byComplect);
           break;
       }
     },
     addDate: function addDate() {
       var formattedDate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.calendarDate).format('DD.MM.YYYY');
-      console.log(formattedDate);
-      console.log('Date Added !!!');
+      var index = this.dates_list.indexOf(formattedDate);
+
+      if (index < 0) {
+        this.dates_list.push(formattedDate);
+      }
     },
     removeDate: function removeDate() {
-      console.log('Date removed !!!');
+      if (this.dates_list.length > 0) {
+        this.dates_list.splice(this.dates_list.indexOf(this.dates_list_current), 1);
+      }
     },
-    elSelected: function elSelected() {
-      var formattedDate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.calendarDate).format('DD.MM.YYYY');
+    calendarSelected: function calendarSelected() {
       this.calendarTime.prev = this.calendarTime.now;
       this.calendarTime.now = new Date().getTime();
       var interval = this.calendarTime.now - this.calendarTime.prev;
 
       if (interval < 500) {
-        console.log(interval);
-        console.log(formattedDate);
+        this.addDate();
       }
     }
   }
@@ -54076,19 +54068,22 @@ var render = function() {
           staticClass: "form-control custom-select",
           attrs: { name: "dates_select" },
           on: {
-            change: function($event) {
-              var $$selectedVal = Array.prototype.filter
-                .call($event.target.options, function(o) {
-                  return o.selected
-                })
-                .map(function(o) {
-                  var val = "_value" in o ? o._value : o.value
-                  return val
-                })
-              _vm.dates_option = $event.target.multiple
-                ? $$selectedVal
-                : $$selectedVal[0]
-            }
+            change: [
+              function($event) {
+                var $$selectedVal = Array.prototype.filter
+                  .call($event.target.options, function(o) {
+                    return o.selected
+                  })
+                  .map(function(o) {
+                    var val = "_value" in o ? o._value : o.value
+                    return val
+                  })
+                _vm.dates_option = $event.target.multiple
+                  ? $$selectedVal
+                  : $$selectedVal[0]
+              },
+              _vm.changeDatesSelect
+            ]
           }
         },
         [
@@ -54128,7 +54123,7 @@ var render = function() {
           [
             _c("datepicker", {
               attrs: { name: "date_calendar", inline: true, language: _vm.ru },
-              on: { selected: _vm.elSelected },
+              on: { selected: _vm.calendarSelected },
               model: {
                 value: _vm.calendarDate,
                 callback: function($$v) {
@@ -54163,32 +54158,50 @@ var render = function() {
           )
         ]),
         _vm._v(" "),
-        _vm._m(0)
+        _c("div", { staticClass: "col-sm-4" }, [
+          _c(
+            "select",
+            {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.dates_list_current,
+                  expression: "dates_list_current"
+                }
+              ],
+              staticClass: "form-control",
+              attrs: { name: "dates_list", size: "8" },
+              on: {
+                dblclick: _vm.removeDate,
+                change: function($event) {
+                  var $$selectedVal = Array.prototype.filter
+                    .call($event.target.options, function(o) {
+                      return o.selected
+                    })
+                    .map(function(o) {
+                      var val = "_value" in o ? o._value : o.value
+                      return val
+                    })
+                  _vm.dates_list_current = $event.target.multiple
+                    ? $$selectedVal
+                    : $$selectedVal[0]
+                }
+              }
+            },
+            _vm._l(_vm.dates_list, function(one_date) {
+              return _c("option", { domProps: { value: one_date } }, [
+                _vm._v(_vm._s(one_date))
+              ])
+            }),
+            0
+          )
+        ])
       ]
-    ),
-    _vm._v(" "),
-    _c("div", { staticClass: "row" }, [
-      _c("span", [_vm._v(_vm._s(_vm.dates_result))])
-    ])
+    )
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-sm-4" }, [
-      _c(
-        "select",
-        {
-          staticClass: "form-control",
-          attrs: { name: "dates_list", size: "8" }
-        },
-        [_c("option")]
-      )
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
