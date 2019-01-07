@@ -16,7 +16,7 @@
             <input type="hidden" name="_method" value="PUT">
             {{csrf_field()}}
 
-            @include('admin.articles.partials.form')
+            @include('admin.events.partials.form')
         </form>
 
     </div>

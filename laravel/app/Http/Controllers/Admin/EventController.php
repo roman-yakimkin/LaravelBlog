@@ -8,6 +8,19 @@ use App\Http\Controllers\Controller;
 
 class EventController extends Controller
 {
+    /*
+     * Get datetimes object array
+     */
+    private function getDatetimes($sDates){
+        $dates = explode(",", $sDates);
+        $datetimes = [];
+        foreach($dates as $one_date){
+            $newtime = \DateTime::createFromFormat('d.m.Y', $one_date);
+            $datetimes[] = new \App\EventDates(['event_date' => $newtime->format('Y-m-d')]);
+        }
+        return $datetimes;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -31,7 +44,7 @@ class EventController extends Controller
     {
         return view('admin.events.create', [
             'event' => [],
-            'event_dates' => ['01.01.2500'],
+            'event_dates' => [],
             'delimiter' => 0
         ]);
     }
@@ -47,13 +60,7 @@ class EventController extends Controller
         $event = Event::create($request->all());
 
         if ($request->input('dates_result')){
-            $dates = explode(",", $request->input('dates_result'));
-            $datetimes = [];
-            foreach($dates as $one_date){
-                $newtime = \DateTime::createFromFormat('d.m.Y', $one_date);
-                //dd($newtime->format('Y-m-d'));
-                $datetimes[] = new \App\EventDates(['event_date' => $newtime->format('Y-m-d')]);
-            }
+            $datetimes = $this->getDatetimes($request->input('dates_result'));
             $event->dates()->saveMany($datetimes);
         }
         return redirect()->route('admin.event.index');
@@ -79,8 +86,14 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
+        $aDates = [];
+        $dates = $event->dates()->get();
+        foreach ($dates as $date){
+            $aDates[] = $date->event_date->format('d.m.Y');
+        };
         return view('admin.events.edit', [
            'event' => $event,
+           'event_dates' => $aDates,
            'delimiter' => 0,
         ]);
     }
@@ -96,10 +109,11 @@ class EventController extends Controller
     {
         $event->update();
 
-//        $event->dates()->detach();
+        $event->dates()->delete();
 
-        if ($request->input('dates')){
-//            $event->dates()->attach($request->input('dates'));
+        if ($request->input('dates_result')){
+            $datetimes = $this->getDatetimes($request->input('dates_result'));
+            $event->dates()->saveMany($datetimes);
         }
 
         return redirect()->route('admin.event.index');
