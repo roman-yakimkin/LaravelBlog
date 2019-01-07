@@ -15,7 +15,9 @@ class EventController extends Controller
      */
     public function index()
     {
-        return view('admin.events.index', [
+        $v = 'admin.events.index';
+
+        return view($v, [
             'events' => Event::paginate(10)
         ]);
     }
@@ -94,10 +96,10 @@ class EventController extends Controller
     {
         $event->update();
 
-        $event->dates()->detach();
+//        $event->dates()->detach();
 
         if ($request->input('dates')){
-            $event->dates()->attach($request->input('dates'));
+//            $event->dates()->attach($request->input('dates'));
         }
 
         return redirect()->route('admin.event.index');
@@ -111,7 +113,7 @@ class EventController extends Controller
      */
     public function destroy(Event $event)
     {
-        $event->dates()->detach();
+        $event->dates()->delete();
         $event->delete();
 
         return redirect()->route('admin.event.index');
